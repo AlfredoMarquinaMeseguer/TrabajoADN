@@ -5,16 +5,18 @@
 import re as re
 import urllib.request
 
-#url = 'https://aulavirtual.um.es/access/content/group/1896_G_2022_N_N/PRACTICAS/PRACTICA%202/All_C_genes_DNA.txt'
+# url = 'https://aulavirtual.um.es/access/content/group/1896_G_2022_N_N/PRACTICAS/PRACTICA%202/All_C_genes_DNA.txt'
 
 # Implementar la
-dicc = {"clave":[[],[]]}
+dicc = {"clave": [[], []]}
+diccEnzimas = {}
 
 # dicc["clave"][0].append(2)
 # dicc["clave"][1].append("Hola")
 
 fichero_encimas = "link_bionet.txt"
 fichero_cadenas_C = "All_C_genes_DNA.txt"
+
 
 def rellenaDiccGenes():
     print("Cargando bionet...")
@@ -24,52 +26,66 @@ def rellenaDiccGenes():
 
     # Bucle que recorra todos los genes
     # for i in :
-        # Reemplazar los espacios del grupo seis
-        #   guardar = re.sub("\s", "", grupo6)
+    # Reemplazar los espacios del grupo seis
+    #   guardar = re.sub("\s", "", grupo6)
 
-        # Guardar en diccionario clave grupo 1 y contenido grupo seis reemplazado
+    # Guardar en diccionario clave grupo 1 y contenido grupo seis reemplazado
     return 0
 
+
 def rellenaDiccEnzimas():
-    print("Cargando All_C_genes_DNA.txt...")
+    print("Cargando bionet.txt...")
     # Abrir
 
     # Separar por nombre de enzima
 
-    # Bucle guardar en diccionario
-        # Saltar diez primera lineas
-        # Expresion cada linea "([A-Z]\w*) (\(.+\))? +([A-Z^]+)"
+    with open("link_bionet.txt") as fichero_enzimas:
+        # Saltar diez primera lineas, contienen titulo
+        for _ in range(10):
+            next(fichero_enzimas)
+        # Bucle guardar en diccionario
+        for linea in fichero_enzimas:
+            # Expresion cada linea "([A-Z]\w*) (\(.+\))? +([A-Z^]+)"
+            print(linea)
+            enzima_separada = re.search(r"([A-Z][^ ]*) (\(.+\))? +([A-Z^]+)", linea)
             #  1 -> Clave
+            print(enzima_separada)
+            clave = enzima_separada[1]
             #  3 -> contenido
-
-        # Sustitución grupo 3 -> diana
+            diana = enzima_separada[3]
             # Guardar posición ^ y suprimir
-            # llamar reeemplazar por enzimas
+            posicion_corte = diana.find("^")
+            if posicion_corte == -1:  # Si posicion corte es -1 es porque no está en la diana
+                posicion_corte = 0  # Se supone que el corte es al principio
+            else:  # Si "^" está, se suprime
+                diana = re.sub("^", "", diana)
+
+            # Reformatear diana para expresión regular
+            diana = reemplazar_enzimas(diana)
             # Añadir parentesis
+            diana = "(" + diana + ")"
 
-        # Estructura dicc {clave: [[0], "(GGATCC)"]}
-        # Comprobación si existe ya entrada en dicc
-        # if dicc[clave] :
-            # Si Existe añadir grupo3 al string con separador '|'
-                # str.append("|"+diana)
-                # listadeCortes.append(posCorte)
-            # Sino existe crear estrucutra nueva entrada
-                # dicc[clave] = [[posCorte],diana]
-    # Fin Bucle
+            # Estructura dicc {clave: ["(GGATCC)", [0]]}
+            # Comprobación si existe ya entrada en dicc
+            if clave in diccEnzimas:  # Si existe, añadir diana al string con separador '|'
+                diccEnzimas[clave][0] += "|" + diana  # Añadir
+                diccEnzimas[clave][1].append(posicion_corte)
+            else:  # Sino existe crear estrucutra nueva entrada
+                diccEnzimas[clave] = [diana, [posicion_corte]]
 
 
-def consultaGenes() :
+def consultaGenes():
     gen = input("Gen >> ")
 
-    while(gen != "") :
+    while (gen != ""):
         # Comprobar que existe en diccionario
-            # Sino está
-                # print("Nombre de gen incorreto")
-            # Si está
-                # print("-------------- "+dicc[clave].length()+" nucleótidos\n"+ \
-                # dicc[gen]+ \
-                # "\n--------------")
-                # consultaEnzimas(dicc[gen])
+        # Sino está
+        # print("Nombre de gen incorreto")
+        # Si está
+        # print("-------------- "+dicc[clave].length()+" nucleótidos\n"+ \
+        # dicc[gen]+ \
+        # "\n--------------")
+        # consultaEnzimas(dicc[gen])
 
         # volver a pedir otro gen
         gen = input("Gen >> ")
@@ -78,27 +94,29 @@ def consultaGenes() :
     # Salir
 
 
-def consultaEnzimas(gen : str) :
+def consultaEnzimas(gen: str):
     # Listado de clave
-        # dicc.keys()
+    # dicc.keys()
 
-    enzima = input("Enzima >> ")
+    consulta = input("Enzima >> ")
     enzimaTratado = False
 
     # Bucle comprobar nombre enzima
-    # Comporbar todas la enzimas con la expresión regular
-        # Si la expresión hace algún tipo de match
-            # tratarEnzima(gen, enzima)
-            # enzimaTratado = True
+    for enzima in diccEnzimas.keys():
+        print("`pito")
+    # Comprobar todas la enzimas con la expresión regular
+    # Si la expresión hace algún tipo de match
+    # tratarEnzima(gen, enzima)
+    # enzimaTratado = True
 
     if not enzimaTratado:
         print("Nombre de enzima incorrecto")
 
 
-def tratarEnzima(gen:str, nombre_enzima:str):
+def tratarEnzima(cadena_gen: str, nombre_enzima: str):
     # Pasamos variables del dicc a una forma más manejable
-    expresion_enzima = dicc[nombre_enzima][1]
-    gorritos_enzima = dicc[nombre_enzima][0]
+    expresion_enzima = dicc[nombre_enzima][0]
+    gorritos_enzima = dicc[nombre_enzima][1]
 
     # Aquí guardaremos las coincidencias
     cortes = []
@@ -107,7 +125,7 @@ def tratarEnzima(gen:str, nombre_enzima:str):
     indice_inicio = 0
 
     # Función search devuelve primer match hecho
-    objeto_match = re.search(expresion_enzima, gen)
+    objeto_match = re.search(expresion_enzima, cadena_gen)
 
     # Estructura dicc {clave: [[0], "(GGATCC)"]}
     # Este bucle sigue buscando hasta que no se encuentren más coincidencias
@@ -115,8 +133,8 @@ def tratarEnzima(gen:str, nombre_enzima:str):
         cortes.append(objeto_match.start())
         # Aprendemos que grupo ha hecho match
         i = 1
-        while (objeto_match[i] == None):
-          i += 1
+        while not objeto_match[i]:
+            i += 1
 
         # Añadimos posicion de corte a la lista de cortes
         cortes.append(indice_inicio + objeto_match.start() + gorritos_enzima[i - 1])
@@ -124,14 +142,14 @@ def tratarEnzima(gen:str, nombre_enzima:str):
         indice_inicio += objeto_match.end()
 
         # Actualizar string quitando la parte ya comprobada
-        gen = gen[objeto_match.end():]
+        cadena_gen = cadena_gen[objeto_match.end():]
 
         # Se busca el siguiente punto de corte
-        objeto_match = re.search(expresion_enzima, gen)
+        objeto_match = re.search(expresion_enzima, cadena_gen)
 
     # Se imprime mensaje si la lista de cortes no está vacia
     if len(cortes) != 0:
-        print(nombre_enzima+" # "+cortes)
+        print(nombre_enzima + " # " + cortes.__str__())
 
 
 def abrir_fichero(fichero):
@@ -143,33 +161,26 @@ def abrir_fichero(fichero):
     except IOError as e:
         print('link_bionet no disponible: ', e)
 
+
 def reemplazar_enzimas(cadena):
-    cadena = re.sub("R", "[AG]",cadena)
-    cadena = re.sub("Y", "[CT]", cadena)
-    cadena = re.sub("M", "[AC]", cadena)
-    cadena = re.sub("K", "[GT]", cadena)
-    cadena = re.sub("S", "[CG]", cadena)
-    cadena = re.sub("W", "[AT]", cadena)
-    cadena = re.sub("B", "[CGT]", cadena)
-    cadena = re.sub("D", "[AGT]", cadena)
-    cadena = re.sub("H", "[ACT]", cadena)
-    cadena = re.sub("V", "[ACG]", cadena)
-    cadena = re.sub("N", "[ACGT]", cadena)
+    cadena = re.sub(r"R", "[AG]", cadena)
+    cadena = re.sub(r"Y", "[CT]", cadena)
+    cadena = re.sub(r"M", "[AC]", cadena)
+    cadena = re.sub(r"K", "[GT]", cadena)
+    cadena = re.sub(r"S", "[CG]", cadena)
+    cadena = re.sub(r"W", "[AT]", cadena)
+    cadena = re.sub(r"B", "[CGT]", cadena)
+    cadena = re.sub(r"D", "[AGT]", cadena)
+    cadena = re.sub(r"H", "[ACT]", cadena)
+    cadena = re.sub(r"V", "[ACG]", cadena)
+    cadena = re.sub(r"N", "[ACGT]", cadena)
     return cadena
 
+
 def main():
-    cadena_prueba = "UcoMSI (SacI)                     GAGCTCNNNNN^"
-    #Coge y Separa una linea de
-    d = re.search("(\w+) (\(.+\))? +([ATCGRYMKSWBDHVN^]+)",cadena_prueba)
-
-
-
-
-    print(d.group(1),d.group(2),d.group(3))
-    reemplazado = reemplazar_enzimas(d.group(3))
-    print(reemplazado)
+    rellenaDiccEnzimas()
+    print(diccEnzimas.items())
 
 
 if __name__ == '__main__':
     main()
-
