@@ -1,14 +1,10 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import re as re
 
 # url = 'https://aulavirtual.um.es/access/content/group/1896_G_2022_N_N/PRACTICAS/PRACTICA%202/All_C_genes_DNA.txt'
 
 # Implementar la
-dicc = {"clave": [[], []]}
 diccEnzimas = {}
+diccGenes = {}
 
 # dicc["clave"][0].append(2)
 # dicc["clave"][1].append("Hola")
@@ -19,17 +15,17 @@ fichero_cadenas_C = "All_C_genes_DNA.txt"
 
 def rellenaDiccGenes():
     print("Cargando bionet...")
-    # No Abrir fichero por lineas
-    abrir_fichero("All_C_genes_DNA.txt")
-    # Cogemos todos los genes
-
+    # Abre el fichero completo
+    with open(fichero_cadenas_C) as fichero:
+        # Cogemos todos los genes
+        genes = re.findall(r"(?<=\n)>(C\.\w*).*\n([ATGC\s]+)(?=\n)", fichero.read())
     # Bucle que recorra todos los genes
-    # for i in :
-    # Reemplazar los espacios del grupo seis
-    #   guardar = re.sub("\s", "", grupo6)
+    for gen in genes:
+        # Reemplazar los espacios del grupo seis
+        nucleotidos = re.sub(r"\s", "", gen[1])
+        # Guardar en diccionario clave grupo 1 y contenido grupo seis reemplazado
+        diccGenes[gen[0]] = nucleotidos
 
-    # Guardar en diccionario clave grupo 1 y contenido grupo seis reemplazado
-    return 0
 
 
 # Rellena el diccionario de enzimas con los datos presentes en el fichero link_bionet.txt
@@ -78,21 +74,23 @@ def rellenaDiccEnzimas():
 def consultaGenes():
     gen = input("Gen >> ")
 
-    while (gen != ""):
+    while gen != "":
         # Comprobar que existe en diccionario
-        # Sino está
-        # print("Nombre de gen incorreto")
+        # Si no está
+        if gen not in diccGenes:
+            print("Nombre de gen incorreto")
         # Si está
-        # print("-------------- "+dicc[clave].length()+" nucleótidos\n"+ \
-        # dicc[gen]+ \
-        # "\n--------------")
-        # consultaEnzimas(dicc[gen])
+        else:
+            # Se imprime el numero de nucleotidos y la cadena del gen en el formato especificado
+            print("-------------- " + diccGenes[gen].length() + " nucleótidos\n" +
+                  diccGenes[gen] +
+                  "\n--------------")
+        # Llama a la funcion consulta enzimas
+            consultaEnzimas(diccGenes[gen])
 
-        # volver a pedir otro gen
         gen = input("Gen >> ")
 
-    # print("==============")
-    # Salir
+    print("==============")
 
 
 # Acción que consulta enzimas del diccionario con una expresión regular hasta que se introduzca la cadena vacia
@@ -160,16 +158,6 @@ def tratarEnzima(cadena_gen: str, nombre_enzima: str):
         print(nombre_enzima + " # " + cortes.__str__())
 
 
-def abrir_fichero(fichero):
-    try:
-        fichero = open(fichero, "r")
-        for linea in fichero:
-            linea = linea.strip()
-            print(linea)
-    except IOError as e:
-        print('link_bionet no disponible: ', e)
-
-
 def reemplazar_enzimas(cadena):
     cadena = re.sub(r"R", "[AG]", cadena)
     cadena = re.sub(r"Y", "[CT]", cadena)
@@ -186,13 +174,9 @@ def reemplazar_enzimas(cadena):
 
 
 def main():
+    rellenaDiccGenes()
     rellenaDiccEnzimas()
-    cadena_gen = "ATGGCAGTCAGCTATAAGAAATTATTTCATTTACTGATAGAAAAAGATATGACAAATACCCAATTACAACAAGAAGCAGGATTTTCAGCAAATATT" +\
-                 "ATCACTCGTTTAAAACGAAATGGATATGTGTCTTTAGAAAGTATAGAAAGTATTTGCCGGGTTATGAACTGCGGCGTTGATGGTATTCTGGAGTTT" +\
-                 "GTTCCAGAGGACGGAGGAGAGAACAATGATCGATACTAA"
-
-    cadena_gen2 = "ATGAAAGAAAGCAAGACAACGGGAGAAGTACTACGCGAAGAAAGAGAGAAAAAAGGACTTCTGCTTAGGCAAGTAGCGGCTATGCTTGACATAGACACAGCCATACTTAGCAAAATTGAAAGAGGCGAAAGAAAAGCAAATAAAGAACAGATAATAAAACTTGCTGAAATTCTCGAACTAGACGAAGAAGCATTAATTGTTCAATACCTAAGCGAAAAGATTCTCTATGAAATAAAAGATGAAGAATTGGGAAGCAAAGCCCTTAAAGCAGCAGAACAAAAGATGAAATACAAAAACAAAAACAATAGCTGA "
-    consultaEnzimas(cadena_gen2)
+    consultaGenes()    
 
 
 if __name__ == '__main__':
