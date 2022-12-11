@@ -100,7 +100,7 @@ def consulta_enzimas(cadena_gen: str):
         # Comprobar todas la enzimas con la expresión regular
         for enzima in diccEnzimas.keys():
             # Comprobamos enzima a enzima
-            if re.search(r"^" + consulta, enzima):
+            if re.search(r"^" + consulta + r"$", enzima):
                 # Si la consulta coincide con el enzima se trata
                 tratar_enzima(cadena_gen, enzima)
                 # Se informa de que se ha realizado al menos una coincidencia
