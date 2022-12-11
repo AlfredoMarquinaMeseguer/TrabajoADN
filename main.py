@@ -17,14 +17,16 @@ def rellenaDiccGenes():
     # Abre el fichero completo
     with open(fichero_cadenas_C) as fichero:
         # Cogemos todos los genes
-        genes = re.split(r"(?<=\n)>.*\n((\w|\s)+)(?=\n)", fichero.read())
+        genes = re.findall(r"(?<=\n)>(C\.\w*).*\n([ATGC\s]+)(?=\n)", fichero.read())
     # Bucle que recorra todos los genes
+    # print(genes)
+    # print(len(genes))
     for gen in genes:
-        separado = re.search(r">(C\.(\w*)) *((\d+) nt)\n([ATGC\s]+)", gen)
+        # separado = re.search(r">(C\.(\w*)) *((\d+) nt)\n([ATGC\s]+)", gen)
         # Reemplazar los espacios del grupo seis
-        nucleotidos = re.sub(r"\s", "", separado.group(6))
+        nucleotidos = re.sub(r"\s", "", gen[1])
         # Guardar en diccionario clave grupo 1 y contenido grupo seis reemplazado
-        diccGenes[separado.group(1)] = nucleotidos
+        diccGenes[gen[0]] = nucleotidos
 
 
 def rellenaDiccEnzimas():
@@ -61,7 +63,7 @@ def consultaGenes():
     while gen != "":
         # Comprobar que existe en diccionario
         # Si no está
-        if not diccGenes[gen]:
+        if gen not in diccGenes:
             print("Nombre de gen incorreto")
         # Si está
         else:
@@ -70,7 +72,7 @@ def consultaGenes():
                   diccGenes[gen] +
                   "\n--------------")
         # Llama a la funcion consulta enzimas
-        consultaEnzimas(diccGenes[gen])
+            consultaEnzimas(diccGenes[gen])
 
         gen = input("Gen >> ")
 
@@ -130,16 +132,7 @@ def tratarEnzima(gen: str, nombre_enzima: str):
 
     # Se imprime mensaje si la lista de cortes no está vacia
     if len(cortes) != 0:
-        print(nombre_enzima + " # " + cortes)
-
-
-def abrir_fichero(fichero):
-    try:
-        with open(fichero, "r") as f:
-            contents = f.read()
-            print(contents)
-    except IOError as e:
-        print('link_bionet no disponible: ', e)
+        print(nombre_enzima + " # " + cortes.__str__())
 
 
 def reemplazar_enzimas(cadena):
@@ -158,13 +151,10 @@ def reemplazar_enzimas(cadena):
 
 
 def main():
-    cadena_prueba = "UcoMSI (SacI)                     GAGCTCNNNNN^"
-    # Coge y Separa una linea de
-    d = re.search("(\w+) (\(.+\))? +([ATCGRYMKSWBDHVN^]+)", cadena_prueba)
-
-    print(d.group(1), d.group(2), d.group(3))
-    reemplazado = reemplazar_enzimas(d.group(3))
-    print(reemplazado)
+    rellenaDiccGenes()
+    print(diccGenes.keys())
+    print(diccGenes.items())
+    consultaGenes()
 
 
 if __name__ == '__main__':
