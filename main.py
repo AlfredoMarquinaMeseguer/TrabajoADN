@@ -19,10 +19,7 @@ def rellenaDiccGenes():
         # Cogemos todos los genes
         genes = re.findall(r"(?<=\n)>(C\.\w*).*\n([ATGC\s]+)(?=\n)", fichero.read())
     # Bucle que recorra todos los genes
-    # print(genes)
-    # print(len(genes))
     for gen in genes:
-        # separado = re.search(r">(C\.(\w*)) *((\d+) nt)\n([ATGC\s]+)", gen)
         # Reemplazar los espacios del grupo seis
         nucleotidos = re.sub(r"\s", "", gen[1])
         # Guardar en diccionario clave grupo 1 y contenido grupo seis reemplazado
