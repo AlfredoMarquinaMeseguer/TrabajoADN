@@ -43,33 +43,39 @@ def rellenaDiccEnzimas():
         # Saltar diez primera lineas, contienen titulo
         for _ in range(10):
             next(fichero_enzimas)
+        # Expresion cada linea "([A-Z]\w*) (\(.+\))? +([A-Z^]+)"
+        #   1 -> nombre enzima
+        #   2 -> prototipo
+        #   3 -> diana
+        enzimas_separadas = re.findall(r"([A-Z][^ ]*) (\(.+\))? +([A-Z^]+)", fichero_enzimas.read())
         # Bucle guardar en diccionario
-        for linea in fichero_enzimas:
-            # Expresion cada linea "([A-Z]\w*) (\(.+\))? +([A-Z^]+)"
-            print(linea)
-            enzima_separada = re.search(r"([A-Z][^ ]*) (\(.+\))? +([A-Z^]+)", linea)
-            #  1 -> Clave
-            print(enzima_separada)
-            clave = enzima_separada[1]
-            #  3 -> contenido
-            diana = enzima_separada[3]
+        print(enzimas_separadas)
+        for actual in enzimas_separadas:
+            #  nombre enzima -> clave diccionario
+            clave = actual[0]
+            #  diana -> contenido diccionario
+            diana = actual[2]
             # Guardar posición ^ y suprimir
             posicion_corte = diana.find("^")
+            copia = posicion_corte
             if posicion_corte == -1:  # Si posicion corte es -1 es porque no está en la diana
-                posicion_corte = 0  # Se supone que el corte es al principio
+                posicion_corte = 0  # Se supone que el corte está al principio
             else:  # Si "^" está, se suprime
-                diana = re.sub("^", "", diana)
-
+                diana = re.sub(r"\^", "", diana)
             # Reformatear diana para expresión regular
             diana = reemplazar_enzimas(diana)
             # Añadir parentesis
             diana = "(" + diana + ")"
 
+            print(clave, copia, posicion_corte, diana)
             # Estructura dicc {clave: ["(GGATCC)", [0]]}
             # Comprobación si existe ya entrada en dicc
             if clave in diccEnzimas:  # Si existe, añadir diana al string con separador '|'
-                diccEnzimas[clave][0] += "|" + diana  # Añadir
-                diccEnzimas[clave][1].append(posicion_corte)
+                # Comprobamos que esta combinación no se encuentra ya en el diccionario
+                comprobar = re.sub(r"[\[\]()]", r"\\\g<0>", diana)
+                if not re.search(comprobar, diccEnzimas[clave][0]):  # Si no hay coincidencia devuelve None
+                    diccEnzimas[clave][0] += "|" + diana  # Añadir el separador
+                    diccEnzimas[clave][1].append(posicion_corte)
             else:  # Sino existe crear estrucutra nueva entrada
                 diccEnzimas[clave] = [diana, [posicion_corte]]
 
@@ -99,17 +105,17 @@ def consultaEnzimas(gen: str):
     # dicc.keys()
 
     consulta = input("Enzima >> ")
-    enzimaTratado = False
+    enzima_tratado = False
 
     # Bucle comprobar nombre enzima
-    for enzima in diccEnzimas.keys():
-        print("`pito")
     # Comprobar todas la enzimas con la expresión regular
-    # Si la expresión hace algún tipo de match
-    # tratarEnzima(gen, enzima)
-    # enzimaTratado = True
+    for enzima in diccEnzimas.keys():
+        # Comprobamos enzima a enzima
+        if re.search(consulta, enzima):  # Si la expresión hace algún
+            tratarEnzima(gen, enzima)
+            enzima_tratado = True
 
-    if not enzimaTratado:
+    if not enzima_tratado:
         print("Nombre de enzima incorrecto")
 
 
