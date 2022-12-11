@@ -1,20 +1,19 @@
 import re as re
 
-# url = 'https://aulavirtual.um.es/access/content/group/1896_G_2022_N_N/PRACTICAS/PRACTICA%202/All_C_genes_DNA.txt'
+# Trabajo realizado por Daniel Martínez Prior y Alfredo Marquina Meseguer
 
-# Implementar la
+# Diccionarios requeridos son globales
 diccEnzimas = {}
 diccGenes = {}
 
-# dicc["clave"][0].append(2)
-# dicc["clave"][1].append("Hola")
-
+# Creamos variables con nombres de los ficheros a consultar
 fichero_enzimas = "link_bionet.txt"
 fichero_cadenas_C = "All_C_genes_DNA.txt"
 
 
-def rellenaDiccGenes():
-    print("Cargando bionet...")
+# Rellena el diccionario de genes con los datos presentes en el fichero All_C_genes_DNA.txt
+def rellena_dicc_genes():
+    print("Cargando All_C_genes_DNA.txt...")
     # Abre el fichero completo
     with open(fichero_cadenas_C) as fichero:
         # Cogemos todos los genes
@@ -27,9 +26,8 @@ def rellenaDiccGenes():
         diccGenes[gen[0]] = nucleotidos
 
 
-
 # Rellena el diccionario de enzimas con los datos presentes en el fichero link_bionet.txt
-def rellenaDiccEnzimas():
+def rellena_dicc_enzimas():
     print("Cargando bionet...")
     # Abrir fichero
     with open(fichero_enzimas) as fichero:
@@ -71,8 +69,9 @@ def rellenaDiccEnzimas():
                 diccEnzimas[clave] = [diana, [posicion_corte]]
 
 
-def consultaGenes():
-    gen = input("Gen >> ")
+# Acción que consulta genes del diccionario por nombre hasta que se introduzca la cadena vacia
+def consulta_genes():
+    gen = input("--------------\nGen >> ")
 
     while gen != "":
         # Comprobar que existe en diccionario
@@ -82,19 +81,16 @@ def consultaGenes():
         # Si está
         else:
             # Se imprime el numero de nucleotidos y la cadena del gen en el formato especificado
-            print("-------------- " + diccGenes[gen].length() + " nucleótidos\n" +
-                  diccGenes[gen] +
-                  "\n--------------")
-        # Llama a la funcion consulta enzimas
-            consultaEnzimas(diccGenes[gen])
+            print("-------------- " + str(len(diccGenes[gen])) + " nucleótidos\n" +
+                  diccGenes[gen])
+            # Llama a la funcion consulta enzimas
+            consulta_enzimas(diccGenes[gen])
 
-        gen = input("Gen >> ")
-
-    print("==============")
+        gen = input("--------------\nGen >> ")
 
 
 # Acción que consulta enzimas del diccionario con una expresión regular hasta que se introduzca la cadena vacia
-def consultaEnzimas(cadena_gen: str):
+def consulta_enzimas(cadena_gen: str):
     # Variable controla si alguna enzima coincide con la consulta
     enzima_tratado = False
     # Se le piden consultas al usuario hasta que consulte cadena vacia
@@ -104,23 +100,24 @@ def consultaEnzimas(cadena_gen: str):
         # Comprobar todas la enzimas con la expresión regular
         for enzima in diccEnzimas.keys():
             # Comprobamos enzima a enzima
-            if re.search(r"^"+consulta, enzima):
+            if re.search(r"^" + consulta, enzima):
                 # Si la consulta coincide con el enzima se trata
-                tratarEnzima(cadena_gen, enzima)
+                tratar_enzima(cadena_gen, enzima)
                 # Se informa de que se ha realizado al menos una coincidencia
                 enzima_tratado = True
         # Si no hemos encontrado ninguna coincidencia se imprime un mensaje
         if not enzima_tratado:
             print("Nombre de enzima incorrecto")
-        else: # Sino, se resetea la variable de control
+        else:  # Sino, se resetea la variable de control
             enzima_tratado = False
         # Volvemos a pedir otra consulta
         consulta = input("--------------\nEnzima >> ")
 
+
 # Recibe el nombre de un enzima y la cadena de ADN de un gen.
 # Imprime los puntos de corte del enzima en el gen.
 # Si no encuentra ninguna coincidencia no imprime nada
-def tratarEnzima(cadena_gen: str, nombre_enzima: str):
+def tratar_enzima(cadena_gen: str, nombre_enzima: str):
     # Pasamos variables del diccionario a una forma más manejable
     expresion_enzima = diccEnzimas[nombre_enzima][0]
     gorritos_enzima = diccEnzimas[nombre_enzima][1]
@@ -158,6 +155,7 @@ def tratarEnzima(cadena_gen: str, nombre_enzima: str):
         print(nombre_enzima + " # " + cortes.__str__())
 
 
+# Reemplaza subpatrones de la cadenas ezima por una expresión regular
 def reemplazar_enzimas(cadena):
     cadena = re.sub(r"R", "[AG]", cadena)
     cadena = re.sub(r"Y", "[CT]", cadena)
@@ -174,9 +172,11 @@ def reemplazar_enzimas(cadena):
 
 
 def main():
-    rellenaDiccGenes()
-    rellenaDiccEnzimas()
-    consultaGenes()    
+    print("==============")
+    rellena_dicc_enzimas()
+    rellena_dicc_genes()
+    consulta_genes()
+    print("==============")
 
 
 if __name__ == '__main__':
